@@ -68,7 +68,7 @@ app.post('/register', function(req, res){
     if (err) {
       console.log(err);
     } else {
-      res.redirect('/login');
+      res.redirect('/');
     }
   });
 });
@@ -84,6 +84,11 @@ app.get('/', function(req, res){
     signedIn = false;
   }
   res.render('index', {text: text, signedIn: signedIn});
+});
+
+app.get('/logout', function(req, res){
+  req.logout();
+  res.redirect('/');
 });
 
 app.listen(3000);
