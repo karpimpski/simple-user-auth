@@ -4,4 +4,10 @@
 
 <body>
 <p><%= text %></p>
+
+<% if (!signedIn) {%>
+<a href='/register'>Register</a>
+<a href='/login'>Login</a>
+<% }%>
+
 </body>

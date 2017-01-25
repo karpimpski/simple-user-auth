@@ -77,11 +77,13 @@ app.get('/', function(req, res){
   console.log(req.user);
   if(req.user){
     var text = `Welcome, ${req.user.username}!`;
+    var signedIn = true;
   }
   else{
     text = 'You are not signed in.';
+    signedIn = false;
   }
-  res.render('index', {text: text});
+  res.render('index', {text: text, signedIn: signedIn});
 });
 
 app.listen(3000);
