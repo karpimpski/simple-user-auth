@@ -7,8 +7,8 @@ mongoose.connect(process.env.DB_URI);
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var session = require('express-session');
+var ejs = require('ejs');
 
-app.use(express.static('views'));
 app.use(cookieParser());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }))
@@ -19,6 +19,8 @@ app.use(session({
 }));
 app.use(passport.initialize());
 app.use(passport.session());
+app.set('view engine', 'ejs');
+app.set('views', __dirname + '/views');
 
 var User = require('./models/user.js');
 
@@ -48,7 +50,7 @@ passport.use(new LocalStrategy(
 ));
 
 app.get('/login', function(req, res){
-  res.sendFile(__dirname + '/views/login.html');
+  res.render('login');
 });
 
 app.post('/login',
@@ -56,7 +58,7 @@ app.post('/login',
                                    failureRedirect: '/login' }));
 
 app.get('/register', function(req, res){
-  res.sendFile(__dirname + '/views/register.html');
+  res.render('register');
 })
 
 app.post('/register', function(req, res){
@@ -72,7 +74,14 @@ app.post('/register', function(req, res){
 });
 
 app.get('/', function(req, res){
-  res.sendFile(__dirname + '/views/index.html');
+  console.log(req.user);
+  if(req.user){
+    var text = `Welcome, ${req.user.username}!`;
+  }
+  else{
+    text = 'You are not signed in.';
+  }
+  res.render('index', {text: text});
 });
 
 app.listen(3000);
