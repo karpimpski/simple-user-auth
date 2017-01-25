@@ -1,13 +1,14 @@
-var passport = require('passport')
-  , LocalStrategy = require('passport-local').Strategy;
+var passport = require('passport');
+var LocalStrategy = require('passport-local').Strategy;
 var express = require('express');
 var app = express();
-var mongoose = require('mongoose');
-mongoose.connect(process.env.DB_URI);
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var session = require('express-session');
 var ejs = require('ejs');
+
+var mongoose = require('mongoose');
+mongoose.connect(process.env.DB_URI);
 
 app.use(cookieParser());
 app.use(bodyParser.json());
@@ -49,30 +50,6 @@ passport.use(new LocalStrategy(
   }
 ));
 
-app.get('/login', function(req, res){
-  res.render('login');
-});
-
-app.post('/login',
-  passport.authenticate('local', { successRedirect: '/',
-                                   failureRedirect: '/login' }));
-
-app.get('/register', function(req, res){
-  res.render('register');
-})
-
-app.post('/register', function(req, res){
-  console.log(req.body);
-  var user = new User({ username: req.body.username, password: req.body.password });
-  user.save(function (err) {
-    if (err) {
-      console.log(err);
-    } else {
-      res.redirect('/');
-    }
-  });
-});
-
 app.get('/', function(req, res){
   console.log(req.user);
   if(req.user){
@@ -86,9 +63,45 @@ app.get('/', function(req, res){
   res.render('index', {text: text, signedIn: signedIn});
 });
 
+app.get('/login', function(req, res){
+  res.render('login');
+});
+
+app.get('/register', function(req, res){
+  res.render('register');
+});
+
 app.get('/logout', function(req, res){
   req.logout();
   res.redirect('/');
+});
+
+app.post('/login',
+  passport.authenticate('local', { successRedirect: '/',
+                                   failureRedirect: '/login' }));
+
+app.post('/register', function(req, res){
+  console.log(req.body);
+  User.find({username: req.body.username}, function(err, users){
+    if(err) throw err;
+    if(users.length == 0){
+      var user = new User({ username: req.body.username, password: req.body.password });
+      user.save(function (err) {
+        if (err) {
+          console.log(err);
+        } else {
+          req.login(user, function(err){
+            if(err) throw err;
+            res.redirect('/');
+          })
+        }
+      });
+    }
+    else{
+      res.redirect('/register');
+    }
+  })
+  
 });
 
 app.listen(3000);
