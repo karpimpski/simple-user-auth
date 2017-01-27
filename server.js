@@ -51,7 +51,6 @@ passport.use(new LocalStrategy(
 ));
 
 app.get('/', function(req, res){
-  console.log(req.user);
   if(req.user){
     var text = `Welcome, ${req.user.username}!`;
     var signedIn = true;
@@ -74,6 +73,15 @@ app.get('/register', function(req, res){
 app.get('/logout', function(req, res){
   req.logout();
   res.redirect('/');
+});
+
+app.get('/profile', function(req, res){
+  if(!req.user){
+    res.end('User not found');
+  }
+  else{
+    res.render('profile', {name: req.user.username});
+  }
 });
 
 app.post('/login',
