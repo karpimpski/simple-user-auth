@@ -6,6 +6,7 @@ var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var session = require('express-session');
 var ejs = require('ejs');
+var flash = require('connect-flash');
 
 var mongoose = require('mongoose');
 mongoose.connect(process.env.DB_URI);
@@ -20,6 +21,7 @@ app.use(session({
 }));
 app.use(passport.initialize());
 app.use(passport.session());
+app.use(flash());
 app.set('view engine', 'ejs');
 app.set('views', __dirname + '/views');
 
@@ -63,7 +65,7 @@ app.get('/', function(req, res){
 });
 
 app.get('/login', function(req, res){
-  res.render('login');
+  res.render('login', {message: req.flash('error')});
 });
 
 app.get('/register', function(req, res){
@@ -86,7 +88,8 @@ app.get('/profile', function(req, res){
 
 app.post('/login',
   passport.authenticate('local', { successRedirect: '/',
-                                   failureRedirect: '/login' }));
+                                   failureRedirect: '/login',
+                                   failureFlash: true }));
 
 app.post('/register', function(req, res){
   User.find({username: req.body.username}, function(err, users){
