@@ -12,7 +12,7 @@ mongoose.connect(process.env.DB_URI);
 
 app.use(cookieParser());
 app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: false }))
+app.use(bodyParser.urlencoded({ extended: false }));
 app.use(session({
     secret: 'keyboard cat',
     resave: true,
@@ -77,7 +77,7 @@ app.get('/logout', function(req, res){
 
 app.get('/profile', function(req, res){
   if(!req.user){
-    res.end('User not found');
+    res.redirect('/login');
   }
   else{
     res.render('profile', {name: req.user.username});
@@ -89,7 +89,6 @@ app.post('/login',
                                    failureRedirect: '/login' }));
 
 app.post('/register', function(req, res){
-  console.log(req.body);
   User.find({username: req.body.username}, function(err, users){
     if(err) throw err;
     if(users.length == 0){
@@ -101,15 +100,21 @@ app.post('/register', function(req, res){
           req.login(user, function(err){
             if(err) throw err;
             res.redirect('/');
-          })
+          });
         }
       });
     }
     else{
       res.redirect('/register');
     }
-  })
-  
+  });
+});
+
+app.delete('/deleteuser', function(req, res){
+  User.findByIdAndRemove(req.user._id, function (err,user){
+    if(err) throw err;
+    res.end('successfully deleted user');
+  });
 });
 
 app.listen(process.env.PORT);
